@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -75,7 +77,9 @@ public class Produto implements Serializable{
             uniqueConstraints = {@UniqueConstraint(columnNames = {"pessoa_fisica","produto"})})
     private List<PessoaFisica> desejam = new ArrayList<>();
     
-    
+     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Arquivo> arquivos = new ArrayList<>(); //eu só tenho list do obj no lado onde o relacionamento é 1 quando há composição(diamante preenchido) ou oneToMany e asseta aponta para essa classe 
+     
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "fornecimento",
             joinColumns =
@@ -86,10 +90,30 @@ public class Produto implements Serializable{
             )
     private List<PessoaJuridica> fornecimento = new ArrayList<>();
     
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Foto> fotos = new ArrayList<>();
+    
 
     public Produto() {
     }
+    
+    public void adicionarArquivo(Arquivo arquivo){
+        arquivo.setProduto(this);
+        this.arquivos.add(arquivo);
+    }
+    
+    public void removeArquivo(int index){
+        this.arquivos.remove(index);
+    }
 
+    public void adicionarFoto(Foto foto ){
+        foto.setProduto(this);
+        this.fotos.add(foto);
+    }
+    
+    public void removeFoto(int index){
+        this.fotos.remove(index);
+    }
     public Integer getId() {
         return id;
     }
@@ -161,6 +185,24 @@ public class Produto implements Serializable{
     public void setFornecimento(List<PessoaJuridica> fornecimento) {
         this.fornecimento = fornecimento;
     }
+
+    public List<Arquivo> getArquivos() {
+        return arquivos;
+    }
+
+    public void setArquivos(List<Arquivo> arquivos) {
+        this.arquivos = arquivos;
+    }
+
+    public List<Foto> getFotos() {
+        return fotos;
+    }
+
+    public void setFotos(List<Foto> fotos) {
+        this.fotos = fotos;
+    }
+    
+    
 
     @Override
     public int hashCode() {
